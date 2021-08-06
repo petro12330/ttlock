@@ -2,6 +2,7 @@ from audioop import reverse
 from datetime import datetime
 from pprint import pprint
 
+from django.contrib.auth.views import LoginView, LogoutView
 from django.http import HttpResponseBadRequest, HttpResponse, Http404, \
     HttpResponseRedirect
 import json
@@ -81,7 +82,9 @@ def list_users(request, error=None):
             error = create_new_user(request)
         if "update_phone_btn" in request.POST:
             error = add_phone_user(request)
-
+    print(request.user.is_authenticated())
+    if not request.user.is_authenticated():
+        HttpResponseRedirect("/login/")
     user=request.user
     users = models.TtlockUser.objects.filter(lockId__profile__user=user).order_by("-lockDate")
     phone_form = PhoneForm()
@@ -134,3 +137,10 @@ def create_new_user(request):
     else:
         error = "Пользовательно не создан, проверьте правильность данных"
     return error
+
+
+class LogInView(LoginView):
+    template_name = "login.html"
+
+class LogOutView(LogoutView):
+    template_name = ""
