@@ -10,9 +10,9 @@ class Ttlock(models.Model):
                                          max_length=35)
     clientId = models.CharField(verbose_name="Номер клиета",
                                          max_length=35)
-    access_token = models.CharField(verbose_name="Токен",
+    access_token = models.CharField(verbose_name="Аксес токен",
                                          max_length=35)
-    refresh_token = models.CharField(verbose_name="Токен",
+    refresh_token = models.CharField(verbose_name="Рефреш окен",
                                          max_length=35)
     address = models.CharField(verbose_name="Адрес",
                                          max_length=40)

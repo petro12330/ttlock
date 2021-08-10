@@ -8,6 +8,8 @@ from django.http import HttpResponseBadRequest, HttpResponse, Http404, \
 import json
 
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+
 from . import models
 from .forms import PhoneForm, CreateUserForm
 from . import models
@@ -18,34 +20,70 @@ def send_message(user):
     print(f"Пришел ученик {user.username}, время прихода {user.lockDate}")
 
 
-def check_in_base(data):
+def check_in_base(data, request):
+    ttlock = models.Ttlock.objects.get(
+        profile__user=request.user
+    )
     for user_data in data:
-        lockDate = datetime.utcfromtimestamp(int(1627124350)).strftime(
-            '%H:%M  %d.%m.%Y')
+        username = user_data['username']
+        # lockDate = user_data["lockDate"]
+        lockDate = datetime.utcfromtimestamp(int(str(user_data["serverDate"])[:-3])).strftime(
+                    '%H:%M  %d.%m.%Y')
+        keyboardPwd = user_data["keyboardPwd"]
+        recordType = user_data["recordType"]
+        success = user_data["success"],
         try:
             user = models.TtlockUser.objects.get(
-                lockId=user_data["lockId"],
-                keyboardPwd=user_data["keyboardPwd"],
-                username=user_data["username"],
+                lockId=ttlock,
+                keyboardPwd=keyboardPwd,
+                username=username,
+                success=1,
             )
-            if user.lockDate != lockDate:
+            if user.lockDate < lockDate:
                 user.lockDate = lockDate
                 user.save()
                 send_message(user)
         except Exception:
             try:
-                user = models.models.TtlockUser.objects.create(
-                    lockId=user_data["lockId"],
+                user = models.TtlockUser.objects.create(
+                    lockId=ttlock,
                     lockDate=lockDate,
-                    recordType=user_data["recordType"],
+                    recordType=recordType,
                     success=user_data["success"],
-                    keyboardPwd=user_data["keyboardPwd"],
-                    username=user_data["username"],
+                    keyboardPwd=keyboardPwd,
+                    username=username,
                 )
-                print("Новый ученик")
                 send_message(user)
             except Exception:
                 raise HttpResponseBadRequest
+
+    # for user_data in data:
+    #     lockDate = datetime.utcfromtimestamp(int(1627124350)).strftime(
+    #         '%H:%M  %d.%m.%Y')
+    #     try:
+    #         user = models.TtlockUser.objects.get(
+    #             lockId=ttlock,
+    #             keyboardPwd=user_data["keyboardPwd"],
+    #             username=user_data["username"],
+    #         )
+    #         if user.lockDate != lockDate:
+    #             user.lockDate = lockDate
+    #             user.save()
+    #             send_message(user)
+    #     except Exception:
+    #         try:
+    #             user = models.TtlockUser.objects.create(
+    #                 lockId__lockId=ttlock,
+    #                 lockDate=lockDate,
+    #                 recordType=user_data["recordType"],
+    #                 success=user_data["success"],
+    #                 keyboardPwd=user_data["keyboardPwd"],
+    #                 username=user_data["username"],
+    #             )
+    #             print("Новый ученик")
+    #             send_message(user)
+    #         except Exception:
+    #             raise HttpResponseBadRequest
 
 
 def get_data(body):
@@ -67,11 +105,12 @@ def get_data(body):
         raise HttpResponseBadRequest
 
 
+@csrf_exempt
 def update_or_auto_create_user(request):
     if request.method == 'POST':
         body = request.body
         data = json.loads(body)
-        check_in_base(data)
+        check_in_base(data, request)
         return HttpResponse("OK", status=201)
     return HttpResponse("Bad", status=404)
 
