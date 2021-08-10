@@ -13,7 +13,7 @@ from .forms import PhoneForm, CreateUserForm
 from . import models
 from .services.lock_service import create_user
 
-
+REDIRECT_FIELD_NAME = '/'
 def send_message(user):
     print(f"Пришел ученик {user.username}, время прихода {user.lockDate}")
 
@@ -82,19 +82,21 @@ def list_users(request, error=None):
             error = create_new_user(request)
         if "update_phone_btn" in request.POST:
             error = add_phone_user(request)
-    print(request.user.is_authenticated())
-    if not request.user.is_authenticated():
-        HttpResponseRedirect("/login/")
-    user=request.user
-    users = models.TtlockUser.objects.filter(lockId__profile__user=user).order_by("-lockDate")
+    user = request.user
+    if not user.is_authenticated:
+        return HttpResponseRedirect("/login/")
+    users = models.TtlockUser.objects.filter(
+        lockId__profile__user=user).order_by("-lockDate")
     phone_form = PhoneForm()
     create_user_form = CreateUserForm()
     return render(request, "ttlock/list.html", {"users": users,
                                                 "phone_form": phone_form,
-                                                "create_user_form":create_user_form,
-                                                "error":error
+                                                "create_user_form": create_user_form,
+                                                "error": error
                                                 })
 
+def redirerect_home(request):
+    return HttpResponseRedirect("/")
 
 def add_phone_user(request):
     error = None
@@ -110,6 +112,7 @@ def add_phone_user(request):
             raise Http404("Ученик не найден")
     error = "Номер должен начинаться с 7 и состоять из 11 цифр"
     return error
+
 
 def create_new_user(request):
     error = None
@@ -141,6 +144,8 @@ def create_new_user(request):
 
 class LogInView(LoginView):
     template_name = "login.html"
+    LOGIN_REDIRECT_URL = '/'
+
 
 class LogOutView(LogoutView):
     template_name = ""

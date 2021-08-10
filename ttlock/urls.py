@@ -8,4 +8,5 @@ urlpatterns = [
     path("", list_users),
     path('login/', views.LogInView.as_view(), name='login'),
     path('logout/', views.LogOutView.as_view(), name='logout'),
+    path("accounts/profile/", views.redirerect_home),
 ]
