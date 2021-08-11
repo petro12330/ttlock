@@ -7,6 +7,6 @@ urlpatterns = [
     path("api/test/", update_or_auto_create_user),
     path("", list_users),
     path('login/', views.LogInView.as_view(), name='login'),
-    path('logout/', views.LogOutView.as_view(), name='logout'),
+    path('logout/', views.LogoutView.as_view(), name='logout'),
     path("accounts/profile/", views.redirerect_home),
 ]

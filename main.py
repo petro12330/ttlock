@@ -40,5 +40,6 @@ while True:
 
         payload = json.dumps(response)
         response = s.post(url, data=payload, cookies=s.cookies)
+        print(response.text)
         print(response.status_code)
         sleep(get_sleep_time())

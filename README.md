@@ -16,3 +16,6 @@ os.environ["DJANGO_SETTINGS_MODULE"] = "ttlock_last.settings"
 
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
+
+
+source /home/c/ci34005/django_lock/myenv/bin/activate
