@@ -10,9 +10,9 @@ token = "df770940fe92c0cc4b771410a44de9fc"
 s = requests.Session()
 s.get('http://ci34005-django.tw1.ru/login/')
 csrftoken = s.cookies['csrftoken']
-login_data = dict(username="admin", password="12345",
+login_data = dict(username="admin", password="1234554321",
                   csrfmiddlewaretoken=csrftoken, next='/')
-r = s.post("http://127.0.0.1:8000/login/", data=login_data)
+r = s.post("http://ci34005-django.tw1.ru/login/", data=login_data)
 
 ttlock = ttlockwrapper.TTLock(clientId, token)
 
@@ -26,10 +26,10 @@ for gateway in gateways:
 
 def get_sleep_time():
     now = datetime.datetime.now()
-    if now.hour > 6 and now.hour <= 19:
+    if now.hour > 6 and now.hour <= 20:
         sleep_time = 360
     else:
-        sleep_time = 900
+        sleep_time = 3600
     return sleep_time
 
 
@@ -40,6 +40,5 @@ while True:
 
         payload = json.dumps(response)
         response = s.post(url, data=payload, cookies=s.cookies)
-        print(response.text)
         print(response.status_code)
         sleep(get_sleep_time())
