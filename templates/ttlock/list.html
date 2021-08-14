@@ -36,7 +36,7 @@
                         <input id="phone" type="text" class="form-control" name="phone" maxlength="11" placeholder="Номер телефона, начиная с 7" aria-label="Имя пользователя" aria-describedby="basic-addon1">
                     </td>
                     <td>
-                        <input id="password" type="text" class="form-control" name="password" maxlength="11" placeholder="Пароль" aria-label="Имя пользователя" aria-describedby="basic-addon1">
+                        <input id="password" type="text" class="form-control" name="password" maxlength="9" placeholder="Пароль" aria-label="Имя пользователя" aria-describedby="basic-addon1">
                     </td>
                     <td>
                         <button class="btn btn-primary" type="submit" name="create_user_btn">Добавить ученика</button>
@@ -58,24 +58,31 @@
                 <td>Телефон</td>
                 <td>Пароль</td>
                 <td>Дата посещения</td>
+                <td></td>
             </tr>
-              {% if users %}
-                        {% for user in users %}
+          {% if users_with_data %}
+                        {% for user in users_with_data %}
                           <tr>
                             <td>{{ user.username }}</td>
                             <td>
                                 {% if not user.phone %}
                                     <form method="POST">
-                                        {% csrf_token %}
-                                        <div class="input-group mb-3">
-                                            <input id="phone" type="text" class="form-control" name="phone" maxlength="11" placeholder="Номер телефона, начиная с 7" aria-label="Имя пользователя" aria-describedby="basic-addon1">
-                                            <button class="btn btn-primary" type="submit" name="create_user_btn">Добавить</button>
+                                        <div class="input-group mb-3" >
+                                            {% csrf_token %}
+                                            <input id="phone" type="text" class="form-control" name="phone" maxlength="11" placeholder="Номер телефона, начиная с 7" aria-label="Имя пользователя" aria-describedby="basic-addon1" >
+                                            <button class="btn btn-primary" type="submit" name="update_phone_btn">Добавить</button>
+                                            <input type="hidden" name="user_id" value={{ user.id }}>
                                         </div>
-
-                                        <input type="hidden" name="user_id" value={{ user.id }}>
                                     </form>
                                 {% else %}
-                                    {{ user.phone }}
+                                        <form method="POST">
+                                            {% csrf_token %}
+                                            <div class="input-group mb-3">
+                                                <input id="phone" disabled="disabled" type="text" class="form-control" name="phone" maxlength="11" placeholder="{{ user.phone }}" aria-label="Имя пользователя" aria-describedby="basic-addon1">
+                                                <button class="btn btn-danger" type="submit" name="delete_phone_btn">Удалить номер</button>
+                                                <input type="hidden" name="user_id" value={{ user.id }}>
+                                            </div>
+                                        </form>
                                 {% endif %}
                             </td>
                             <td>{{ user.keyboardPwd }}</td>
@@ -83,10 +90,65 @@
                                     Посещений нет
                                 {% else %}
                                     {{ user.lockDate }}
-                                {% endif %}</td>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form method="POST">
+                                {% csrf_token %}
+                                <div class="input-group mb-3">
+                                    <button class="btn btn-danger" type="submit" name="delete_user_btn">Удалить пользователя</button>
+                                    <input type="hidden" name="user_id" value={{ user.id }}>
+                                </div>
+                                </form>
+                            </td>
                           </tr>
                         {% endfor %}
                     {% endif %}
+              {% if users_with_out_data %}
+                        {% for user in users_with_out_data %}
+                          <tr>
+                            <td>{{ user.username }}</td>
+                            <td>
+                                {% if not user.phone %}
+                                    <form method="POST">
+                                        <div class="input-group mb-3" >
+                                            {% csrf_token %}
+                                            <input id="phone" type="text" class="form-control" name="phone" maxlength="11" placeholder="Номер телефона, начиная с 7" aria-label="Имя пользователя" aria-describedby="basic-addon1" >
+                                            <button class="btn btn-primary" type="submit" name="update_phone_btn">Добавить</button>
+                                            <input type="hidden" name="user_id" value={{ user.id }}>
+                                        </div>
+                                    </form>
+                                {% else %}
+                                        <form method="POST">
+                                            {% csrf_token %}
+                                            <div class="input-group mb-3">
+                                                <input id="phone" disabled="disabled" type="text" class="form-control" name="phone" maxlength="11" placeholder="{{ user.phone }}" aria-label="Имя пользователя" aria-describedby="basic-addon1">
+                                                <button class="btn btn-danger" type="submit" name="delete_phone_btn">Удалить номер</button>
+                                                <input type="hidden" name="user_id" value={{ user.id }}>
+                                            </div>
+                                        </form>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.keyboardPwd }}</td>
+                            <td>{% if not user.lockDate %}
+                                    Посещений нет
+                                {% else %}
+                                    {{ user.lockDate }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form method="POST">
+                                {% csrf_token %}
+                                <div class="input-group mb-3">
+                                    <button class="btn btn-danger" type="submit" name="delete_user_btn">Удалить пользователя</button>
+                                    <input type="hidden" name="user_id" value={{ user.id }}>
+                                </div>
+                                </form>
+                            </td>
+                          </tr>
+                        {% endfor %}
+                    {% endif %}
+
           </table>
       </div>
     </div>

@@ -1,122 +1,79 @@
-
-from datetime import datetime
-
+import json
+import time
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
-
-from django.http import HttpResponseBadRequest, HttpResponse, Http404, \
+from django.http import HttpResponse, Http404, \
     HttpResponseRedirect
-import json
-
 from django.shortcuts import render
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import FormView
 
-from .forms import PhoneForm, CreateUserForm
 from . import models
+from .forms import PhoneForm, CreateUserForm
+from .services.ttlock_user_service import translate_username, auto_users
 from .services.lock_service import create_user
 
-REDIRECT_FIELD_NAME = '/'
-
-
-def send_message(user):
-    print(f"Пришел ученик {user.username}, время прихода {user.lockDate}")
-
-
-def check_in_base(data, request):
-    ttlock = models.Ttlock.objects.get(
-        profile__user=request.user
-    )
-    for user_data in data:
-        username = user_data['username']
-        # lockDate = user_data["lockDate"]
-        lockDate = datetime.utcfromtimestamp(
-            int(str(user_data["serverDate"])[:-3])).strftime(
-            '%H:%M  %d.%m.%Y')
-        keyboardPwd = user_data["keyboardPwd"]
-        recordType = user_data["recordType"]
-        success = user_data["success"],
-        try:
-            user = models.TtlockUser.objects.get(
-                lockId=ttlock,
-                keyboardPwd=keyboardPwd,
-                username=username,
-                success=1,
-            )
-            if user.lockDate < lockDate:
-                user.lockDate = lockDate
-                user.save()
-                send_message(user)
-        except Exception:
-            try:
-                user = models.TtlockUser.objects.create(
-                    lockId=ttlock,
-                    lockDate=lockDate,
-                    recordType=recordType,
-                    success=user_data["success"],
-                    keyboardPwd=keyboardPwd,
-                    username=username,
-                )
-                send_message(user)
-            except Exception:
-                raise HttpResponseBadRequest
-
-
-def get_data(body):
+def delete_user(request):
     try:
-        list_with_values = ['lockId',
-                            'serverDate',
-                            'hotelUsername',
-                            'recordType',
-                            'success',
-                            'keyboardPwd',
-                            'username',
-                            'lockDate']
-        json_data = json.loads(body)
-        for i in json_data:
-            if i not in list_with_values:
-                raise HttpResponseBadRequest
-        return json_data
-    except Exception:
-        raise HttpResponseBadRequest
+        print(request.POST["user_id"])
+        models.TtlockUser.objects.get(id=request.POST["user_id"]).delete()
 
+    except Exception:
+        raise Http404("Ученик не найден")
 
 @csrf_exempt
 def update_or_auto_create_user(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         body = request.body
         data = json.loads(body)
-        check_in_base(data, request)
+        auto_users(data, request)
         return HttpResponse("OK", status=201)
     return HttpResponse("Bad", status=404)
 
 
 def list_users(request, error=None):
-    phone_form = PhoneForm()
-    if request.method == 'POST':
+    if request.method == "POST":
         if "create_user_btn" in request.POST:
             error = create_new_user(request)
-            return HttpResponseRedirect("/")
-        if "update_phone_btn" in request.POST:
+            if error is None:
+                return HttpResponseRedirect("/")
+        elif "update_phone_btn" in request.POST:
             error = add_phone_user(request)
-            return HttpResponseRedirect("/")
+            if error is None:
+                return HttpResponseRedirect("/")
+        elif "delete_phone_btn" in request.POST:
+            error = delete_phone_user(request)
+            if error is None:
+                return HttpResponseRedirect("/")
+        elif "delete_user_btn" in request.POST:
+
+            error = delete_user(request)
+            if error is None:
+                return HttpResponseRedirect("/")
+
     user = request.user
     if not user.is_authenticated:
         return HttpResponseRedirect("/login/")
-    users = models.TtlockUser.objects.filter(
-        lockId__profile__user=user).order_by("-lockDate")
+    users_with_out_data = models.TtlockUser.objects.filter(lockDate=None)
+    users_with_data = sorted(models.TtlockUser.objects.exclude(id__in=users_with_out_data).filter(
+        lockId__profile__user=user), key=lambda x: time.strptime(x.lockDate, "%H:%M  %d.%m.%Y"),
+           reverse=True)
+    # users = users_with_data.append(list(users_with_out_data))
     phone_form = PhoneForm()
     create_user_form = CreateUserForm()
-    return render(request, "ttlock/list.html", {"users": users,
-                                                "phone_form": phone_form,
-                                                "create_user_form": create_user_form,
-                                                "error": error
-                                                })
+    return render(request, "ttlock/list.html", {
+        "users_with_out_data":users_with_out_data,
+        "users_with_data": users_with_data,
+        "phone_form": phone_form,
+        "create_user_form": create_user_form,
+        "error": error
+    }
+                  )
 
 
-def redirerect_home(request):
+def redirect_home(request):
     return HttpResponseRedirect("/")
 
 
@@ -125,40 +82,56 @@ def add_phone_user(request):
     form = PhoneForm(request.POST)
     if form.is_valid():
         try:
-            user = models.TtlockUser.objects.get(id=request.POST['user_id'])
-            user.phone = form.cleaned_data['phone']
+            user = models.TtlockUser.objects.get(id=request.POST["user_id"])
+            user.phone = form.cleaned_data["phone"]
             user.save()
-            error = "Номер успешно добавлен"
             return error
         except Exception:
-            raise Http404("Ученик не найден")
+            raise "Ученик не найден"
     error = "Номер должен начинаться с 7 и состоять из 11 цифр"
     return error
 
 
+def delete_phone_user(request):
+    try:
+        user = models.TtlockUser.objects.get(id=request.POST["user_id"])
+        user.phone = None
+        user.save()
+        HttpResponseRedirect("/")
+    except Exception:
+        raise Http404("Ученик не найден")
+
+
+
+
+
 def create_new_user(request):
+    ru_alf = " абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
     error = None
     form = CreateUserForm(request.POST)
     if form.is_valid():
         ttlock = models.Ttlock.objects.get(
             profile__user=request.user
         )
-        username = form.cleaned_data['username']
-        phone = form.cleaned_data['phone']
-        password = form.cleaned_data['password']
-        if not create_user(ttlock.clientId, ttlock.access_token,
-                           ttlock.client_secret, username, password):
-            error = "Ошибка при создании пользователя"
-
-        else:
-            models.TtlockUser.objects.create(
+        username_ru = form.cleaned_data["username"]
+        for sym in username_ru:
+            if sym.lower() not in ru_alf:
+                return "Имя должно быть только на русском языке"
+        username_en = translate_username(username_ru)
+        phone = form.cleaned_data["phone"]
+        password = form.cleaned_data["password"]
+        if create_user(ttlock.clientId, ttlock.access_token,
+                       ttlock.client_secret, username_en, password):
+            models.TtlockUser.objects.get_or_create(
                 lockId=ttlock,
                 phone=phone,
                 keyboardPwd=password,
-                username=username,
+                username=username_ru,
             )
-            error = "Ученик успешно создан"
             return error
+
+        else:
+            error = "Ошибка при создании пользователя"
     else:
         error = "Пользовательно не создан, проверьте правильность данных"
     return error

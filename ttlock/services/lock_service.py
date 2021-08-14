@@ -1,8 +1,11 @@
 import time
+import uuid
+
 import requests
 
 API_URI = 'https://api.ttlock.com/v3'
 ADD_PASSCODE = 'keyboardPwd/add'
+CHANGE_PASSCODE = "keyboardPwd/change"
 
 GATEWAY_LIST_URL = '{}/{}?clientId={}&accessToken={}&pageNo={}&pageSize={}&date={}'
 GATEWAY_LIST_RESOURCE = 'gateway/list'
@@ -10,8 +13,8 @@ GATEWAY_LIST_RESOURCE = 'gateway/list'
 LOCKS_PER_GATEWAY_URL = '{}/{}?clientId={}&accessToken={}&gatewayId={}&date={}'
 LOCKS_PER_GATEWAY_RESOURCE = 'gateway/listLock'
 
-USER_CREATE_URL = '{}/{}?clientId={}&accessToken={}&lockId={}&keyboardPwd={}&keyboardPwdName={}&startDate={}&endDate={}&date={}'
-
+CREATE_PASSCODE_URL = '{}/{}?clientId={}&accessToken={}&lockId={}&keyboardPwd={}&keyboardPwdName={}&startDate={}&endDate={}&addType=2&date={}'
+CHANGE_PASSCODE_URL = '{}/{}?clientId={}&accessToken={}&lockId={}&keyboardPwd={}&keyboardPwdName={}&startDate={}&endDate={}&addType=2&date={}'
 
 def get_current_millis():
     return int(round(time.time() * 1000))
@@ -76,7 +79,6 @@ def get_lock_id(clientId, accessToken):
         locks += list(
             get_locks_per_gateway_generator(gateway.get("gatewayId"), clientId,
                                             accessToken))
-    print(locks)
     return locks
 
 
@@ -94,7 +96,7 @@ def create_user(clientId, accessToken, clientSecret, username, password):
     lock_id = get_lock_id(clientId, accessToken)[0]['lockId']
     startDate = get_current_millis()
     endDate = startDate + 31104000
-    _url_request = USER_CREATE_URL.format(
+    _url_request = CREATE_PASSCODE_URL.format(
         API_URI,
         ADD_PASSCODE,
         clientId,
@@ -110,3 +112,19 @@ def create_user(clientId, accessToken, clientSecret, username, password):
     if 'keyboardPwdId' in response:
         return True
     return False
+
+
+def change_user_password(clientId, accessToken, clientSecret, username, password):
+    pass
+    lock_id = get_lock_id(clientId, accessToken)[0]['lockId']
+    newKeyboardPwd = uuid.uuid4()
+    _url_request = CREATE_PASSCODE_URL.format(
+        API_URI,
+        CHANGE_PASSCODE,
+        clientId,
+        accessToken,
+        lock_id,
+        password,
+        newKeyboardPwd
+    )
+    response = send_request(_url_request).json()

@@ -39,6 +39,7 @@ class TtlockUser(models.Model):
 
 
 class Profile(models.Model):
+    """Пользователи сайта"""
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     lockId = models.ForeignKey(Ttlock, verbose_name="Номер замка",
                                on_delete=models.CASCADE)
