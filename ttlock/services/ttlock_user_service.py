@@ -15,16 +15,21 @@ def translate_username(username):
     return new_username
 
 
-def get_ttlock(user):
+def get_ttlock(data):
     return models.Ttlock.objects.get(
-        profile__user=user
+        lockId=data[0]["lockId"]
     )
 
 
 def get_user_data(user_info):
     hours_3 = 10800  # Погрешность в 3 часа при переводе форматов
-    username_en = str(user_info["username"])
-    username_ru = retranslate_username(username_en)
+    recordType = int(user_info["recordType"])
+    if recordType != 4:
+        username_en = str(user_info["username"])
+        username_ru = retranslate_username(username_en)
+    else:
+        username_en = str(user_info["username"])
+        username_ru = str(user_info["username"])
     lockDate = str(datetime.utcfromtimestamp(
         int(str(user_info["serverDate"])[:-3]) + hours_3).strftime(
         "%H:%M  %d.%m.%Y"))
@@ -42,7 +47,6 @@ def get_user(ttlock, username_ru, lockDate, keyboardPwd):
             username=username_ru
         )
     except models.TtlockUser.DoesNotExist:
-        print("Создал пользователя")
         user = models.TtlockUser.objects.create(
             lockId_id=ttlock.id,
             keyboardPwd=keyboardPwd,
@@ -57,7 +61,7 @@ def encode_time(date):
 
 
 def auto_users(data, request):
-    ttlock = get_ttlock(request.user)
+    ttlock = get_ttlock(data)
     for user_info in data:
         if user_info['username'] is None:
             continue

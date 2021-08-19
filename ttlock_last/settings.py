@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
 from pathlib import Path
-
+from decouple import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,10 +20,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-eoxixsg$q7geq8tf0eu+#dln)g@w*h29$i$gnx1d7qob#m^z22'
+SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG")
 
 ALLOWED_HOSTS = ["*"]
 
@@ -127,7 +127,6 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-BASE_URL_ADDRESS = "http://127.0.0.1:8000/"
-# BASE_URL_ADDRESS = "http://ci34005-django.tw1.ru/"
+BASE_URL_ADDRESS = config("BASE_URL_ADDRESS")
 
-TOKEN = "85b705d7d5d8f412074f11b1494a2b"
+TOKEN = config("TOKEN")
