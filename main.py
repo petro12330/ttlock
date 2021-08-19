@@ -11,7 +11,7 @@ token = "df770940fe92c0cc4b771410a44de9fc"
 s = requests.Session()
 s.get(f'{BASE_URL_ADDRESS}login/')
 csrftoken = s.cookies['csrftoken']
-login_data = dict(username="admin", password="12345",
+login_data = dict(username="admin", password="1234554321",
                   csrfmiddlewaretoken=csrftoken, next='/')
 r = s.post(f"{BASE_URL_ADDRESS}login/", data=login_data)
 
@@ -35,10 +35,11 @@ def get_sleep_time():
 
 
 url = f"{BASE_URL_ADDRESS}api/test/"
-while True:
-    for lock in locks:
-        response = ttlock.get_last_user_list(lock.get("lockId"))["list"]
 
-        payload = json.dumps(response)
-        response = s.post(url, data=payload, cookies=s.cookies)
-        sleep(10)
+for lock in locks:
+  response = ttlock.get_last_user_list(lock.get("lockId"))["list"]
+
+  payload = json.dumps(response)
+  response = s.post(url, data=payload, cookies=s.cookies)
+#  print(response.status_code)
+

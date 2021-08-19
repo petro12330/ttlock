@@ -127,7 +127,7 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-BASE_URL_ADDRESS = "http://127.0.0.1:8000/"
-# BASE_URL_ADDRESS = "http://ci34005-django.tw1.ru/"
+#BASE_URL_ADDRESS = "http://127.0.0.1:8000/"
+BASE_URL_ADDRESS = "http://ci34005-django.tw1.ru/"
 
 TOKEN = "85b705d7d5d8f412074f11b1494a2b"
