@@ -45,9 +45,9 @@ def send_message(user):
     user_phone = str(user.phone)
     # user_phone = "79964414976"
     user_id_dialog = get_or_create_id_user(user_phone)
-    text = f"Пришел ученик {user.username}, время прихода {user.lockDate}"
+    text = f"{user.username} пришёл(а) на занятие в {user.lockDate}"
     url = f"{CHAT_DECK_URL}messages?client_id={user_id_dialog}&text={text}"
-    print(text)
+
     requests.request("POST", url, headers=headers)
 
 

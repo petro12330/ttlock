@@ -15,13 +15,14 @@ from .forms import PhoneForm, CreateUserForm
 from .services.ttlock_user_service import translate_username, auto_users
 from .services.lock_service import create_user
 
+
 def delete_user(request):
     try:
-        print(request.POST["user_id"])
         models.TtlockUser.objects.get(id=request.POST["user_id"]).delete()
 
     except Exception:
         raise Http404("Ученик не найден")
+
 
 @csrf_exempt
 def update_or_auto_create_user(request):
@@ -56,15 +57,17 @@ def list_users(request, error=None):
     user = request.user
     if not user.is_authenticated:
         return HttpResponseRedirect("/login/")
-    users_with_out_data = models.TtlockUser.objects.filter(lockDate=None)
-    users_with_data = sorted(models.TtlockUser.objects.exclude(id__in=users_with_out_data).filter(
-        lockId__profile__user=user), key=lambda x: time.strptime(x.lockDate, "%H:%M  %d.%m.%Y"),
-           reverse=True)
-    # users = users_with_data.append(list(users_with_out_data))
+    users_with_out_data = models.TtlockUser.objects.filter(lockDate=None,
+                                                           lockId__profile__user=user)
+    users_with_data = sorted(
+        models.TtlockUser.objects.exclude(id__in=users_with_out_data).filter(
+            lockId__profile__user=user),
+        key=lambda x: time.strptime(x.lockDate, "%H:%M  %d.%m.%Y"),
+        reverse=True)
     phone_form = PhoneForm()
     create_user_form = CreateUserForm()
     return render(request, "ttlock/list.html", {
-        "users_with_out_data":users_with_out_data,
+        "users_with_out_data": users_with_out_data,
         "users_with_data": users_with_data,
         "phone_form": phone_form,
         "create_user_form": create_user_form,
@@ -100,9 +103,6 @@ def delete_phone_user(request):
         HttpResponseRedirect("/")
     except Exception:
         raise Http404("Ученик не найден")
-
-
-
 
 
 def create_new_user(request):

@@ -19,3 +19,9 @@ application = get_wsgi_application()
 
 
 source /home/c/ci34005/django_lock/myenv/bin/activate
+
+#sh
+  GNU nano 2.9.3                                               main_ttlock.sh                                                          
+#!/bin/sh
+
+/home/c/ci34005/django_lock/myenv/bin/python3.6 /home/c/ci34005/django_lock/public_html/ttlock/main.py

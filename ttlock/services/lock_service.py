@@ -95,7 +95,7 @@ class TTlockAPIError(Exception):
 def create_user(clientId, accessToken, clientSecret, username, password):
     lock_id = get_lock_id(clientId, accessToken)[0]['lockId']
     startDate = get_current_millis()
-    endDate = startDate + 31104000
+    endDate = startDate + (3110400000*9) # примерно 11 месяцев
     _url_request = CREATE_PASSCODE_URL.format(
         API_URI,
         ADD_PASSCODE,

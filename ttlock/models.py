@@ -17,6 +17,9 @@ class Ttlock(models.Model):
     address = models.CharField(verbose_name="Адрес",
                                          max_length=40)
 
+    def __str__(self):
+        return self.address
+
 
 class TtlockUser(models.Model):
     """Модель для обычных пользователей замка(не карта)."""
@@ -37,9 +40,13 @@ class TtlockUser(models.Model):
     username = models.CharField(verbose_name="Имя/Номер пользователя",
                                          max_length=40)
 
+    def __str__(self):
+        return self.username
 
 class Profile(models.Model):
     """Пользователи сайта"""
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     lockId = models.ForeignKey(Ttlock, verbose_name="Номер замка",
                                on_delete=models.CASCADE)
+    def __str__(self):
+        return f"{self.user}, {self.lockId}"
