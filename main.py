@@ -7,15 +7,14 @@ from time import sleep
 from decouple import config
 data_users = [
     {"clientId": "a6c471688b194acc82b60df98f24d548",
-     "token": "9c7e6f5c030584b2a2702602e836a7cf"
+     "token": "823e664c9e0794268ef5d91eec1161cd"
      },
     {"clientId": "ae8f30e62436437d9b8b0f7e4b0e0119",
-     "token": "30eaeeecf56e687dd479b634a1618e96"
+     "token": "e0553cf81ee1c739e33ceaa89bfaefcb"
      },
     {"clientId": "cca62430f2044940903484404753623e",
      "token": "14f427bc0e97f9f9192368a6abee0c3b"
      },
-
 ]
 # clientId = "a6c471688b194acc82b60df98f24d548"
 # token = "9c7e6f5c030584b2a2702602e836a7cf"
