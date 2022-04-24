@@ -50,7 +50,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ttlock_last.wsgi.application'
 
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -103,3 +102,7 @@ TOKEN = config("TOKEN")
 
 # Адрес api chat to desk
 CHAT_DECK_URL = config("CHAT_DECK_URL")
+
+COMPANY_ID = config("COMPANY_ID")  # Номер компании для интеграции с UDS
+API_KEY = config("API_KEY")  # API-key для интеграции с UDS
+BASE_URL_UDS = config("BASE_URL_UDS")

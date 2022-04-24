@@ -1,4 +1,3 @@
-import json
 import time
 
 from django.contrib.auth import login, logout
@@ -14,7 +13,13 @@ from . import models
 from .forms import PhoneForm, CreateUserForm
 from .services.ttlock_user_service import translate_username, auto_users
 from .services.lock_service import create_user
+from django.conf import settings
 
+import json
+import uuid
+import base64
+from datetime import datetime
+from requests import Session
 
 def delete_user(request):
     try:
@@ -141,10 +146,51 @@ def create_new_user(request):
 
 @csrf_exempt
 def create_points(request):
-    import os
-
-    fo = open("/home/c/ci34005/django_lock/public_html/ttlock/ttlock/test.txt", "w")
-    fo.write(str(request.body))
+    s = Session()
+    body = json.loads(request.body)
+    client_phone = body.get("client_phone")
+    money = body.get("money")  # TODO Расчитать количество бонусов
+    client_name = body.get("client_name")  # TODO для холихоп.
+    print("549756044284:ZTg4ZjIzZWEtNGQ0YS00ZTUzLTk3NGQtZWQwYzc2NDFkOWYz")
+    api_key = str(f"{settings.COMPANY_ID}:{settings.API_KEY}")
+    print(api_key)
+    auth_string = base64.b64encode(api_key.encode('utf-8'))
+    r = s.request(
+        method='GET',
+        url=f'{settings.BASE_URL_UDS}customers/find?code=456123&phone=%2b{client_phone}',
+        headers={
+            'Accept': 'application/json',
+            'Accept-Charset': 'utf-8',
+            'Authorization': 'Basic ' + auth_string.decode("utf-8"),
+            'X-Origin-Request-Id': str(uuid.uuid4()),
+            'X-Timestamp': datetime.now().isoformat(),
+        })
+    print(r.status_code)
+    if r.status_code != 200:
+        print("ошибка")
+        return HttpResponse("error", status=400)
+    try:
+        user_id = r.json()['user']['participant']['id']
+        s.request(
+            method='POST',
+            url=f'{settings.BASE_URL_UDS}operations/reward',
+            headers={
+                'Accept': 'application/json',
+                'Accept-Charset': 'utf-8',
+                'Content-Type': 'application/json',
+                'Authorization': 'Basic ' + auth_string.decode("utf-8"),
+                'X-Origin-Request-Id': str(uuid.uuid4()),
+                'X-Timestamp': datetime.now().isoformat(),
+            },
+            data=json.dumps({
+                'participants': [user_id, ],
+                'points': 12,
+            }),
+        )
+        print(r.status_code)
+    except Exception:
+        print("Ошибка начисления бонусов")
+        return HttpResponse("error", status=400)
     return HttpResponse("Ok", status=200)
 
 
