@@ -138,15 +138,16 @@ def create_new_user(request):
         error = "Пользовательно не создан, проверьте правильность данных"
     return error
 
+
 @csrf_exempt
 def create_points(request):
     import os
-   
+
     fo = open("/home/c/ci34005/django_lock/public_html/ttlock/ttlock/test.txt", "w")
-    fo.write(str(request.body)) 
+    fo.write(str(request.body))
     return HttpResponse("Ok", status=200)
-     
-     
+
+
 class LogInView(FormView):
     form_class = AuthenticationForm
 
