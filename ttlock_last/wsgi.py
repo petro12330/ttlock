@@ -12,11 +12,10 @@ sys.path.insert(0, '/home/c/ci34005/django_lock/myenv/lib/python3.6/site-package
 os.environ["DJANGO_SETTINGS_MODULE"] = "ttlock_last.settings"
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
-
-from decouple import config
+from django.conf import settings
 from django.core.wsgi import get_wsgi_application
 
-if config("DEBUG"):
+if settings.DEBUG:
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ttlock_last.settings')
 else:
     import sys
