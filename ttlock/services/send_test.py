@@ -1,22 +1,20 @@
 import json
 import requests
 
-from ttlock.ttlock_last.settings import TOKEN
-
 """
 Скрипт запускается из консоли и нужен для локальной проверки отправки сообщений.
 TODO: добавить кнопку для отправки тесового сообщения из интерфейса
 """
 
 USER_PHONE = None
-
+TOKEN="85b705d7d5d8f412074f11b1494a2b"
 headers = {
     "Authorization": TOKEN,
     "Content-Type": "application/json"
 }
 s = requests.Session()
 
-CHAT_DECK_URL =
+CHAT_DECK_URL = "https://api.chat2desk.com/v1"
 
 
 def response_to_json(response):
@@ -32,7 +30,7 @@ def get_or_create_id_user(phone):
             "phone": phone,
             "transport": "whatsapp"
         })
-        url = "https://api.chat2desk.com/v1/clients"
+        url = f"{CHAT_DECK_URL}/clients"
         response = requests.request("POST", url, headers=headers,
                                     data=payload)
         response_data = response_to_json(response)
@@ -45,8 +43,8 @@ def send_message():
     if USER_PHONE is None:
         print('Напишите номер для отравки в переменную USER_PHONE')
     user_id_dialog = get_or_create_id_user(USER_PHONE)
-    text = f"Отпишись, если пришло"
-    url = f"{CHAT_DECK_URL}messages?client_id={user_id_dialog}&text={text}"
+    text = f"Сформировали для Вас счет. К оплате 1 рублей за Тест"
+    url = f"{CHAT_DECK_URL}/messages?client_id={user_id_dialog}&text={text}"
 
     r = requests.request("POST", url, headers=headers)
     print(r.status_code)
