@@ -1,0 +1,31 @@
+{% extends "index.html" %}
+
+{% block title %} Ученик {{ user.username }} {% endblock %}
+
+{% block h1 %} Ученик {{ user.username }} {% endblock %}
+
+{% block content %}
+        {% if user %}
+            Имя ученика: {{ user.username }} <br>
+            Дата Последнего входа: {{ user.lockDate }} <br>
+            {% if user.phone %}
+                Телефон родителей {{ user.phone}} <br>
+                <form action="{% url 'add_phone_user' user.id %}" method="POST">
+                    {% csrf_token %}
+                    <input type="text" required placeholder="Номер телефона" name="phone"><br>
+                    <button type="submit">Обновить номер</button>
+                </form>
+            {% else %}
+                Телефон родителей:
+                <form action="{% url 'add_phone_user' user.id %}" method="POST">
+                    {% csrf_token %}
+                    <input type="text" required placeholder="Номер телефона" name="phone"><br>
+                    <button type="submit">Отправить</button>
+                </form>
+            {% endif %}
+
+            Пароль {{ user.keyboardPwd }} <br>
+        {% else %}
+            Данных об ученике
+        {% endif %}
+{% endblock %}

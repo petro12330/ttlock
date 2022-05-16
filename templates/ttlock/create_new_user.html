@@ -1,0 +1,15 @@
+{% extends "index.html" %}
+
+{% block title %} Новый ученик {% endblock %}
+
+{% block h1 %} Новый ученик {% endblock %}
+
+{% block content %}
+    <form action="{% url 'create_new_user'%}" method="POST">
+        {% csrf_token %}
+        <input type="text" required placeholder="Имя" name="phone"><br>
+        <input type="text" required placeholder="Номер телефона" name="phone"><br>
+        <input type="text" required placeholder="Пароль" name="phone"><br>
+        <button type="submit">Отправить</button>
+    </form>
+{% endblock %}
