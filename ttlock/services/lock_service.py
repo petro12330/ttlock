@@ -3,6 +3,8 @@ import uuid
 from django.conf import settings
 import requests
 
+from base_ttlock_utils.base_lock import TTlockAPIError
+
 ADD_PASSCODE = 'keyboardPwd/add'
 CHANGE_PASSCODE = "keyboardPwd/change"
 

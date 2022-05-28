@@ -1,4 +1,5 @@
 import time
+import datetime
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
@@ -9,8 +10,10 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import FormView
 
+from base_ttlock_utils.base_lock import TTLock
 from . import models
 from .forms import PhoneForm, CreateUserForm
+from .models import Ttlock
 from .services.holihop_service import update_user_payment
 from .services.send_bonus import add_points_user
 from .services.ttlock_user_service import translate_username, auto_users
@@ -167,15 +170,16 @@ def create_points(request):
 
 
 @csrf_exempt
-def write_request_body(request):
-
+def open_door(request):
     body = json.loads(request.body)
-    body = json.dumps(body)
-    f = open('text.txt', 'w')
-    for i in body:
-        f.write(i)
-    f.close()
-    return HttpResponse(content='ok', status=200)
+    now = datetime.datetime.now()
+    if 8 < now.hour <= 20:
+        lock_id = body.get("lock_id")
+        lock_obj = Ttlock.objects.get(lockId=lock_id)
+        remote_lock = TTLock(clientId=lock_obj.clientId, accessToken=lock_obj.access_token)
+        remote_lock.unlock(lockId=lock_id)
+        return HttpResponse(content='ok', status=200)
+
 
 class LogInView(FormView):
     form_class = AuthenticationForm

@@ -10,5 +10,5 @@ urlpatterns = [
     path('logout/', views.LogoutView.as_view(), name='logout'),
     path("accounts/profile/", views.redirect_home),
     path("api/create_points", views.create_points),
-    path("api/test_write_request_body", views.write_request_body)
+    path("api/open_door", views.open_door)
 ]
