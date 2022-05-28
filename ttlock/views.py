@@ -166,6 +166,17 @@ def create_points(request):
     return HttpResponse(content=error + text, status=status_code)
 
 
+@csrf_exempt
+def write_request_body(request):
+
+    body = json.loads(request.body)
+    body = json.dumps(body)
+    f = open('text.txt', 'w')
+    for i in body:
+        f.write(i)
+    f.close()
+    return HttpResponse(content='ok', status=200)
+
 class LogInView(FormView):
     form_class = AuthenticationForm
 
