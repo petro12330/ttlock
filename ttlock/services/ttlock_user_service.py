@@ -2,7 +2,8 @@ import time
 from datetime import datetime
 
 from ttlock import models
-from ttlock.services.chat2deck_service import send_message, retranslate_username
+from ttlock.services.chat2deck_service import send_message
+from utils import retranslate_username
 
 
 def translate_username(username):

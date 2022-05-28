@@ -81,16 +81,6 @@ def get_lock_id(clientId, accessToken):
     return locks
 
 
-class TTlockAPIError(Exception):
-    def __init__(self, error_code=-3, menssage='Invalid Parameter'):
-        self.error_code = error_code
-        self.menssage = menssage
-
-    def __str__(self):
-        return 'Error returned from TTlockAPI: Error_code {} - {}'.format(
-            self.error_code, self.menssage)
-
-
 def create_user(clientId, accessToken, clientSecret, username, password):
     lock_id = get_lock_id(clientId, accessToken)[0]['lockId']
     startDate = get_current_millis()
@@ -111,19 +101,3 @@ def create_user(clientId, accessToken, clientSecret, username, password):
     if 'keyboardPwdId' in response:
         return True
     return False
-
-
-def change_user_password(clientId, accessToken, clientSecret, username, password):
-    pass
-    lock_id = get_lock_id(clientId, accessToken)[0]['lockId']
-    newKeyboardPwd = uuid.uuid4()
-    _url_request = CREATE_PASSCODE_URL.format(
-        settings.TTLOCK_API_URI,
-        CHANGE_PASSCODE,
-        clientId,
-        accessToken,
-        lock_id,
-        password,
-        newKeyboardPwd
-    )
-    response = send_request(_url_request).json()

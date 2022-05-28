@@ -1,5 +1,5 @@
+from base_ttlock_utils.base_lock import TTLock
 from ttlock_last.settings import BASE_URL_ADDRESS
-from ttlockio import ttlock
 import datetime
 import requests
 import json
@@ -30,14 +30,14 @@ r = s.post(f"{BASE_URL_ADDRESS}login/", data=login_data)
 
 
 def get_locks(token, clientId):
-    ttlock_client = ttlock.TTLock(clientId, token)
-    gateways = list(ttlock_client.get_gateway_generator())
+    lock_client = TTLock(clientId, token)
+    gateways = list(lock_client.get_gateway_generator())
     locks = []
     for gateway in gateways:
         locks += list(
-            ttlock_client.get_locks_per_gateway_generator(
+            lock_client.get_locks_per_gateway_generator(
                 gateway.get("gatewayId")))
-    return locks, ttlock_client
+    return locks, lock_client
 
 
 def get_sleep_time():

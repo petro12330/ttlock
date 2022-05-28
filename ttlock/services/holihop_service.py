@@ -1,8 +1,6 @@
 import json
 from typing import Optional
-
 from django.conf import settings
-
 from requests import Session
 
 URL_GET_CLIENT = f"{settings.HOLIHOP_API_URL}/GetStudents/"
