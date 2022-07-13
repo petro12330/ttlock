@@ -17,6 +17,7 @@ LOCKS_PER_GATEWAY_RESOURCE = 'gateway/listLock'
 CREATE_PASSCODE_URL = '{}/{}?clientId={}&accessToken={}&lockId={}&keyboardPwd={}&keyboardPwdName={}&startDate={}&endDate={}&addType=2&date={}'
 CHANGE_PASSCODE_URL = '{}/{}?clientId={}&accessToken={}&lockId={}&keyboardPwd={}&keyboardPwdName={}&startDate={}&endDate={}&addType=2&date={}'
 
+
 def get_current_millis():
     return int(round(time.time() * 1000))
 
@@ -86,7 +87,7 @@ def get_lock_id(clientId, accessToken):
 def create_user(clientId, accessToken, clientSecret, username, password):
     lock_id = get_lock_id(clientId, accessToken)[0]['lockId']
     startDate = get_current_millis()
-    endDate = startDate + (3110400000*9) # примерно 11 месяцев
+    endDate = startDate + (3110400000 * 9)  # примерно 11 месяцев
     _url_request = CREATE_PASSCODE_URL.format(
         settings.TTLOCK_API_URI,
         ADD_PASSCODE,

@@ -2,6 +2,7 @@ import json
 import requests
 from django.conf import settings
 from utils import response_to_json
+import re
 
 headers = {
     "Authorization": settings.CHAT_2_DECK_TOKEN,
@@ -42,3 +43,11 @@ def get_or_create_id_user(phone):
                                 data=payload)
     response_data = response_to_json(response)
     return response_data["data"]["id"]
+
+
+def prepare_phone(phone):
+    phone = re.sub('[ ()+-]', '', phone)
+    phone = re.sub(f'{phone[0]}', '7', phone, 1)
+    if len(phone) != 11:
+        return None
+    return phone

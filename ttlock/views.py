@@ -14,12 +14,15 @@ from base_ttlock_utils.base_lock import TTLock
 from . import models
 from .forms import PhoneForm, CreateUserForm
 from .models import Ttlock
-from .services.holihop_service import update_user_payment
+from .services.base_utils import write_to_json, open_to_json
+from .services.holihop_service import update_user_payment, get_ed_units, get_ed_units_students, send_message_teachers
 from .services.send_bonus import add_points_user
 from .services.ttlock_user_service import translate_username, auto_users
 from .services.lock_service import create_user
 
 import json
+
+GROUP_JSON_FILE = "list_group.json"
 
 
 def delete_user(request):
@@ -179,6 +182,22 @@ def open_door(request):
         remote_lock = TTLock(clientId=lock_obj.clientId, accessToken=lock_obj.access_token)
         remote_lock.unlock(lockId=lock_id)
         return HttpResponse(content='ok', status=200)
+
+
+@csrf_exempt
+def write_list_notify_group(request):  # Делает рассылку по учителям/записывает группы в файл
+    groups, teachers = get_ed_units()
+    send_message_teachers(groups, teachers)
+    # write_to_json(groups, GROUP_JSON_FILE) # TODO
+    return HttpResponse(content='ok', status=200)
+
+
+@csrf_exempt
+def write_list_notify_students(request):  # Делает рассылку по ученикам/берет данные по группам из файла
+    groups = open_to_json(GROUP_JSON_FILE)
+    ed_units = get_ed_units_students(groups)
+    print(ed_units)
+    return HttpResponse(content='ok', status=200)
 
 
 class LogInView(FormView):
