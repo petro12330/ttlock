@@ -142,4 +142,4 @@ def send_message_teachers(groups, teachers):
         phone = prepare_phone(teacher['phone'])
         if phone is None:
             continue
-        send_message_by_phone('79964414976', teacher['message'])
+        send_message_by_phone(phone, teacher['message'])
