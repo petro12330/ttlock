@@ -1,5 +1,6 @@
 import json
-from datetime import datetime
+from datetime import datetime, date
+from pprint import pprint
 from typing import Optional
 
 from django.conf import settings
@@ -13,6 +14,7 @@ URL_GET_ED_UNITS = f"{settings.HOLIHOP_API_URL}/GetEdUnits/"
 URL_GET_ED_UNITS_STUDENTS = f"{settings.HOLIHOP_API_URL}/GetEdUnitStudents/"
 URL_GET_TEACHERS = f"{settings.HOLIHOP_API_URL}/GetTeachers/"
 
+WEEKDAYS = [1, 2, 4, 8, 16, 32, 64]  # Пн: 1, Вт: 2, Ср: 4, Чт: 8, Пт: 16, Сб: 32, Вс: 64
 
 def update_user_payment(money: int, client_phone: int, payment_method_id: Optional[int]):
     s = Session()
@@ -58,7 +60,7 @@ def get_teacher_info(teacher_id):
         "id": teacher_id
     }
     data = s.get(URL_GET_TEACHERS, data=json.dumps(payload)).json()["Teachers"][0]
-    if "Mobile" not in data or data["Status"] != "Работает":
+    if "Mobile" not in data or data.get("Status", None) != "Работает":
         return
     teacher_data = {
         "teacher_id": teacher_id,
@@ -79,29 +81,27 @@ def get_ed_units():
     }
     payload = {
         "authkey": settings.HOLIHOP_API_KEY,
-        "types": "Group",
-        "weekdays": datetime.weekday(datetime.now()) + 1,  # День недели пн-1 и тд
+        "dateFrom": date.today().strftime("%Y-%m-%d"),
+        "timeFrom": date.today().strftime("%Y-%m-%d"),
+        "weekdays": WEEKDAYS[datetime.weekday(datetime.now())],
         "statuses": "Working"
     }
     data = s.get(URL_GET_ED_UNITS, data=json.dumps(payload)).json()
     ed_units = data.get('EdUnits')
     for ed_unit in ed_units:
-        schedule_items = ed_unit["ScheduleItems"][0]  # TODO Может стрельнуть!!
+        schedule_items = ed_unit["ScheduleItems"][-1]  # TODO Может стрельнуть!!
         if ed_unit["StudentsCount"] <= 0 or "TeacherId" not in schedule_items:
             continue
         teacher_id = schedule_items["TeacherId"]
-        teacher = teachers.get(teacher_id, None)
-        if teacher is None:
+        teacher_info = teachers.get(teacher_id, None)
+        if teacher_info is None:
             teacher_info = get_teacher_info(teacher_id)
             if teacher_info is None:
                 continue
-            teacher = teacher_info
+            teacher_info['message'] = "Добрый день!\nВаше расписание на сегодня:"
             teachers[teacher_id] = teacher_info
 
-        message = teacher.get('message', None)
-        if message is None:
-            teacher['message'] = "Добрый день!\nВаше расписание на сегодня:"
-        teacher['message'] += f'\n• {ed_unit["OfficeOrCompanyName"]} в {schedule_items["BeginTime"]}, ' \
+        teacher_info['message'] += f'\n• {ed_unit["OfficeOrCompanyName"]} в {schedule_items["BeginTime"]}, ' \
                               f'закончится в {schedule_items["EndTime"]};'
         group_data = {
             "id": ed_unit["Id"],
